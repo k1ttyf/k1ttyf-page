@@ -51,6 +51,7 @@ $(document).ready(function () {
   }
 
   const audioElement = new Audio('music.mp3');
+  audioElement.volume = 0.25;
   audioElement.addEventListener('ended', function () {
     location.reload(false);
   });
