@@ -1,4 +1,5 @@
 body {
+    cursor: url('cursor.cur'), auto;
     font-family: 'Montserrat';
     margin: 0;
     padding: 0;
