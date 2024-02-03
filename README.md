@@ -1,2 +1,2 @@
 # k1ttyf-page
-my website: k1ttyf.xyz
+my website: https://k1ttyf.xyz
