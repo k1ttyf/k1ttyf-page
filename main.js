@@ -46,12 +46,9 @@ const awesomeEffectTitle = (options) => {
 };
 
 $(document).ready(function () {
-  if (window.location.hostname !== 'k1ttyf.xyz') {
-    window.location.href = 'https://t.me/k1ttyf';
-  }
-
+  
   const audioElement = new Audio('music.mp3');
-  audioElement.volume = 0.25;
+  audioElement.volume = 0.1;
   audioElement.addEventListener('ended', function () {
     location.reload(false);
   });
