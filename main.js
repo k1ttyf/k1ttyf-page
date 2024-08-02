@@ -1,51 +1,50 @@
-const awesomeEffect = (options) => {
-  let element = options.el;
-  let result = '';
-  let text = options.text;
-  let possibleChars = options.possible ? options.possible : 'ABCDEFASIRUWJFCKSJHYWRKJEsdfskdjfk-+*/|}{[]~\\":;?/.><=+-_)(*&^%$#@!)}';
-  let delay = options.delay ? options.delay : 70;
-
-  const setText = (index, newText) => {
-    setTimeout(() => {
-      element.innerText = newText;
-    }, index * delay);
-  };
-
-  for (let i = 0; i < text.length + 1; i++) {
-    result = text.substr(0, i);
-    for (let j = i; j < text.length; j++) {
-      result += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
-    }
-    setText(i, result);
-    result = '';
-  }
-};
-
-const awesomeEffectTitle = (options) => {
-  let text = options.text;
-  let possibleChars = options.possible ? options.possible : 'ABCDEFASIRUWJFCKSJHYWRKJEsdfskdjfk-+*/|}{[]~\\":;?/.><=+-_)(*&^%$#@!)}';
-  let delay = options.delay ? options.delay : 70;
-
-  const setTitle = (index, newText) => {
-    setTimeout(() => {
-      document.title = newText;
-    }, index * delay);
-  };
-
-  for (let i = 0; i < text.length + 1; i++) {
-    let result = text.substr(0, i);
-    for (let j = i; j < text.length; j++) {
-      result += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
-    }
-    setTitle(i, result);
-  }
-
-  setTimeout(() => {
-    document.title = text;
-  }, text.length * delay);
-};
-
 $(document).ready(function () {
+  const awesomeEffect = (options) => {
+    let element = options.el;
+    let result = '';
+    let text = options.text;
+    let possibleChars = options.possible ? options.possible : 'ABCDEFASIRUWJFCKSJHYWRKJEsdfskdjfk-+*/|}{[]~\\":;?/.><=+-_)(*&^%$#@!)}';
+    let delay = options.delay ? options.delay : 70;
+  
+    const setText = (index, newText) => {
+      setTimeout(() => {
+        element.innerText = newText;
+      }, index * delay);
+    };
+  
+    for (let i = 0; i < text.length + 1; i++) {
+      result = text.substr(0, i);
+      for (let j = i; j < text.length; j++) {
+        result += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
+      }
+      setText(i, result);
+      result = '';
+    }
+  };
+  
+  const awesomeEffectTitle = (options) => {
+    let text = options.text;
+    let possibleChars = options.possible ? options.possible : 'ABCDEFASIRUWJFCKSJHYWRKJEsdfskdjfk-+*/|}{[]~\\":;?/.><=+-_)(*&^%$#@!)}';
+    let delay = options.delay ? options.delay : 70;
+  
+    const setTitle = (index, newText) => {
+      setTimeout(() => {
+        document.title = newText;
+      }, index * delay);
+    };
+  
+    for (let i = 0; i < text.length + 1; i++) {
+      let result = text.substr(0, i);
+      for (let j = i; j < text.length; j++) {
+        result += possibleChars.charAt(Math.floor(Math.random() * possibleChars.length));
+      }
+      setTitle(i, result);
+    }
+  
+    setTimeout(() => {
+      document.title = text;
+    }, text.length * delay);
+  };
   
   const audioElement = new Audio('music.mp3');
   audioElement.volume = 0.1;
@@ -187,5 +186,26 @@ $(document).ready(function () {
       };
       awesomeEffectTitle(documentTitleOptions);
     }, 2500);
+
+    const discordLink = $('.social-link .fa-discord').parent();
+    discordLink.on("click", function(){
+      toastr.info(`Запрашиваем ссылку Discord...`);
+      $.ajax({
+        type: "POST",
+        url: "https://api.k1ttyf.xyz/discord",
+        success: function(response){
+          toastr.clear();
+          discordLink.attr("href", response.url);
+          discordLink.attr("target", response.url);
+          window.open(response.url, '_blank');
+          console.log(response);
+          discordLink.off("click");
+        },
+        error: function(error){
+          toastr.clear();
+          toastr.error(`Повторите попытку позже.`, `Произошла ошибка!`);
+        }
+      })
+    });
   });
 });
