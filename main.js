@@ -198,7 +198,6 @@ $(document).ready(function () {
           discordLink.attr("href", response.url);
           discordLink.attr("target", response.url);
           window.open(response.url, '_blank');
-          console.log(response);
           discordLink.off("click");
         },
         error: function(error){
