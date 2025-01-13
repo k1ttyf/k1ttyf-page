@@ -186,25 +186,5 @@ $(document).ready(function () {
       };
       awesomeEffectTitle(documentTitleOptions);
     }, 2500);
-
-    const discordLink = $('.social-link .fa-discord').parent();
-    discordLink.on("click", function(){
-      toastr.info(`Запрашиваем ссылку Discord...`);
-      $.ajax({
-        type: "POST",
-        url: "https://api.k1ttyf.xyz/discord",
-        success: function(response){
-          toastr.clear();
-          discordLink.attr("href", response.url);
-          discordLink.attr("target", response.url);
-          window.open(response.url, '_blank');
-          discordLink.off("click");
-        },
-        error: function(error){
-          toastr.clear();
-          toastr.error(`Повторите попытку позже.`, `Произошла ошибка!`);
-        }
-      })
-    });
   });
 });
