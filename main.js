@@ -1,17 +1,47 @@
-$(document).ready(function () {
+document.addEventListener('DOMContentLoaded', function () {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isSmallScreen = window.innerWidth < 600;
+
+  const clickScreen = document.querySelector('.click');
+  const block = document.querySelector('.block');
+  const blockTitle = block.querySelector('h1');
+  const blockParagraph = block.querySelector('p');
+
+  const fadeOut = (el, duration, callback) => {
+    el.style.transition = `opacity ${duration}ms ease`;
+    requestAnimationFrame(() => {
+      el.style.opacity = '0';
+    });
+    setTimeout(() => {
+      el.style.display = 'none';
+      if (callback) callback();
+    }, duration);
+  };
+
+  const fadeIn = (el, duration, display) => {
+    el.style.display = display;
+    el.style.opacity = '0';
+    el.style.transition = `opacity ${duration}ms ease`;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.opacity = '1';
+      });
+    });
+  };
+
   const awesomeEffect = (options) => {
     let element = options.el;
     let result = '';
     let text = options.text;
     let possibleChars = options.possible ? options.possible : 'ABCDEFASIRUWJFCKSJHYWRKJEsdfskdjfk-+*/|}{[]~\\":;?/.><=+-_)(*&^%$#@!)}';
     let delay = options.delay ? options.delay : 70;
-  
+
     const setText = (index, newText) => {
       setTimeout(() => {
         element.innerText = newText;
       }, index * delay);
     };
-  
+
     for (let i = 0; i < text.length + 1; i++) {
       result = text.substr(0, i);
       for (let j = i; j < text.length; j++) {
@@ -21,18 +51,18 @@ $(document).ready(function () {
       result = '';
     }
   };
-  
+
   const awesomeEffectTitle = (options) => {
     let text = options.text;
     let possibleChars = options.possible ? options.possible : 'ABCDEFASIRUWJFCKSJHYWRKJEsdfskdjfk-+*/|}{[]~\\":;?/.><=+-_)(*&^%$#@!)}';
     let delay = options.delay ? options.delay : 70;
-  
+
     const setTitle = (index, newText) => {
       setTimeout(() => {
         document.title = newText;
       }, index * delay);
     };
-  
+
     for (let i = 0; i < text.length + 1; i++) {
       let result = text.substr(0, i);
       for (let j = i; j < text.length; j++) {
@@ -40,151 +70,97 @@ $(document).ready(function () {
       }
       setTitle(i, result);
     }
-  
+
     setTimeout(() => {
       document.title = text;
     }, text.length * delay);
   };
-  
+
   const audioElement = new Audio('music.mp3');
   audioElement.volume = 0.1;
   audioElement.addEventListener('ended', function () {
-    location.reload(false);
+    location.reload();
   });
 
-  $('.click').on('click', function () {
-    $('.click').fadeOut(300);
+  const initParticles = () => {
+    if (typeof particlesJS === 'undefined' || prefersReducedMotion) return;
+
+    particlesJS('particles-js', {
+      particles: {
+        number: {
+          value: isSmallScreen ? 26 : 55,
+          density: { enable: true, value_area: 800 },
+        },
+        color: { value: ['#b892ff', '#ff8fd6', '#7ad7ff'] },
+        shape: { type: 'circle' },
+        opacity: {
+          value: 0.5,
+          random: true,
+          anim: { enable: true, speed: 0.5, opacity_min: 0.1, sync: false },
+        },
+        size: {
+          value: 2.5,
+          random: true,
+          anim: { enable: false },
+        },
+        line_linked: {
+          enable: true,
+          distance: 140,
+          color: '#b892ff',
+          opacity: 0.15,
+          width: 1,
+        },
+        move: {
+          enable: true,
+          speed: 0.8,
+          direction: 'none',
+          random: true,
+          straight: false,
+          out_mode: 'out',
+          bounce: false,
+        },
+      },
+      interactivity: {
+        detect_on: 'canvas',
+        events: {
+          onhover: { enable: !isSmallScreen, mode: 'grab' },
+          onclick: { enable: false },
+          resize: true,
+        },
+        modes: {
+          grab: { distance: 160, line_linked: { opacity: 0.4 } },
+        },
+      },
+      retina_detect: true,
+    });
+  };
+
+  const reveal = () => {
+    fadeOut(clickScreen, 300);
     setTimeout(function () {
-      $('.block').fadeIn(300);
-      audioElement.play();
-      const particlesConfig = {
-        particles: {
-          number: {
-            value: 80,
-            density: {
-              enable: true,
-              value_area: 800,
-            },
-          },
-          color: {
-            value: '#ffffff',
-          },
-          shape: {
-            type: 'circle',
-            stroke: {
-              width: 0,
-              color: '#000000',
-            },
-            polygon: {
-              nb_sides: 5,
-            },
-          },
-          opacity: {
-            value: 0.5,
-            random: false,
-            anim: {
-              enable: false,
-              speed: 1,
-              opacity_min: 0.1,
-              sync: false,
-            },
-          },
-          size: {
-            value: 3,
-            random: true,
-            anim: {
-              enable: false,
-              speed: 40,
-              size_min: 0.1,
-              sync: false,
-            },
-          },
-          line_linked: {
-            enable: true,
-            distance: 150,
-            color: '#ffffff',
-            opacity: 0.4,
-            width: 1,
-          },
-          move: {
-            enable: true,
-            speed: 6,
-            direction: 'none',
-            random: false,
-            straight: false,
-            out_mode: 'out',
-            bounce: false,
-            attract: {
-              enable: false,
-              rotateX: 600,
-              rotateY: 1200,
-            },
-          },
-        },
-        interactivity: {
-          detect_on: 'canvas',
-          events: {
-            onhover: {
-              enable: true,
-              mode: 'repulse',
-            },
-            resize: true,
-          },
-          modes: {
-            grab: {
-              distance: 400,
-              line_linked: {
-                opacity: 1,
-              },
-            },
-            bubble: {
-              distance: 400,
-              size: 40,
-              duration: 2,
-              opacity: 8,
-              speed: 3,
-            },
-            repulse: {
-              distance: 200,
-              duration: 0.4,
-            },
-            push: {
-              particles_nb: 4,
-            },
-            remove: {
-              particles_nb: 2,
-            },
-          },
-        },
-        retina_detect: true,
-      };
-      
-      particlesJS('particles-js', particlesConfig);      
+      fadeIn(block, 300, 'flex');
+      audioElement.play().catch(() => {});
+      initParticles();
     }, 300);
 
-    const blockTitle = $('.block h1');
-    const blockTitleText = blockTitle.text();
-    const blockParagraph = $('.block p');
-    const blockParagraphText = blockParagraph.text();
+    if (prefersReducedMotion) return;
+
+    const blockTitleText = blockTitle.textContent;
+    const blockParagraphText = blockParagraph.textContent;
     const documentTitle = document.title;
 
     setInterval(function () {
-      const titleOptions = {
-        el: blockTitle[0],
-        text: blockTitleText,
-      };
-      awesomeEffect(titleOptions);
-
-      const paragraphOptions = {
-        el: blockParagraph[0],
-        text: blockParagraphText,
-      };
-      awesomeEffect(paragraphOptions);
-
-      const documentTitleOptions = {
-        text: documentTitle,
-      };
-      awesomeEffectTitle(documentTitleOptions);
+      awesomeEffect({ el: blockTitle, text: blockTitleText });
+      awesomeEffect({ el: blockParagraph, text: blockParagraphText });
+      awesomeEffectTitle({ text: documentTitle });
     }, 2500);
+  };
+
+  clickScreen.addEventListener('click', reveal);
+  clickScreen.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      reveal();
+    }
   });
 });
