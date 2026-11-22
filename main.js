@@ -1,6 +1,18 @@
 document.addEventListener('DOMContentLoaded', function () {
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  const fontsLoaded = document.fonts
+    ? Promise.all([
+        document.fonts.load('500 48px "Geist"'),
+        document.fonts.load('400 12px "Geist Mono"'),
+      ]).catch(() => {})
+    : Promise.resolve();
+  const timeout = new Promise((resolve) => setTimeout(resolve, 1500));
+
+  Promise.race([fontsLoaded, timeout]).then(() => {
+    requestAnimationFrame(() => document.documentElement.classList.add('is-ready'));
+  });
+
   const clickScreen = document.querySelector('.click');
   const block = document.querySelector('.block');
   const blockTitle = block.querySelector('h1');
