@@ -3,7 +3,7 @@
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (isTouch || prefersReducedMotion) return;
 
-  const colors = ['#b892ff', '#ff8fd6', '#7ad7ff'];
+  const colors = ['#e8a33d', '#eef0f5', '#a3a9b8'];
   const canvas = document.createElement('canvas');
   canvas.style.position = 'fixed';
   canvas.style.inset = '0';

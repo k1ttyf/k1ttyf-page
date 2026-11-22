@@ -1,33 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const isSmallScreen = window.innerWidth < 600;
 
   const clickScreen = document.querySelector('.click');
   const block = document.querySelector('.block');
   const blockTitle = block.querySelector('h1');
-  const blockParagraph = block.querySelector('p');
-
-  const fadeOut = (el, duration, callback) => {
-    el.style.transition = `opacity ${duration}ms ease`;
-    requestAnimationFrame(() => {
-      el.style.opacity = '0';
-    });
-    setTimeout(() => {
-      el.style.display = 'none';
-      if (callback) callback();
-    }, duration);
-  };
-
-  const fadeIn = (el, duration, display) => {
-    el.style.display = display;
-    el.style.opacity = '0';
-    el.style.transition = `opacity ${duration}ms ease`;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        el.style.opacity = '1';
-      });
-    });
-  };
+  const blockParagraph = block.querySelector('.info p');
 
   const awesomeEffect = (options) => {
     let element = options.el;
@@ -77,71 +54,128 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   const audioElement = new Audio('music.mp3');
-  audioElement.volume = 0.1;
-  audioElement.addEventListener('ended', function () {
-    location.reload();
-  });
+  audioElement.loop = true;
 
-  const initParticles = () => {
-    if (typeof particlesJS === 'undefined' || prefersReducedMotion) return;
+  const player = document.querySelector('.player');
+  const playerToggle = player.querySelector('.player-toggle');
+  const volumeInput = player.querySelector('.player-volume');
+  const volumeValue = player.querySelector('.player-value');
+  const DEFAULT_VOLUME = 10;
 
-    particlesJS('particles-js', {
-      particles: {
-        number: {
-          value: isSmallScreen ? 26 : 55,
-          density: { enable: true, value_area: 800 },
-        },
-        color: { value: ['#b892ff', '#ff8fd6', '#7ad7ff'] },
-        shape: { type: 'circle' },
-        opacity: {
-          value: 0.5,
-          random: true,
-          anim: { enable: true, speed: 0.5, opacity_min: 0.1, sync: false },
-        },
-        size: {
-          value: 2.5,
-          random: true,
-          anim: { enable: false },
-        },
-        line_linked: {
-          enable: true,
-          distance: 140,
-          color: '#b892ff',
-          opacity: 0.15,
-          width: 1,
-        },
-        move: {
-          enable: true,
-          speed: 0.8,
-          direction: 'none',
-          random: true,
-          straight: false,
-          out_mode: 'out',
-          bounce: false,
-        },
-      },
-      interactivity: {
-        detect_on: 'canvas',
-        events: {
-          onhover: { enable: !isSmallScreen, mode: 'grab' },
-          onclick: { enable: false },
-          resize: true,
-        },
-        modes: {
-          grab: { distance: 160, line_linked: { opacity: 0.4 } },
-        },
-      },
-      retina_detect: true,
-    });
+  const readSavedVolume = () => {
+    try {
+      const saved = parseInt(localStorage.getItem('k1ttyf-volume'), 10);
+      return saved >= 0 && saved <= 100 ? saved : DEFAULT_VOLUME;
+    } catch (e) {
+      return DEFAULT_VOLUME;
+    }
   };
 
-  const reveal = () => {
-    fadeOut(clickScreen, 300);
-    setTimeout(function () {
-      fadeIn(block, 300, 'flex');
+  const setVolume = (percent, save) => {
+    audioElement.volume = percent / 100;
+    volumeInput.value = percent;
+    volumeInput.style.setProperty('--fill', percent + '%');
+    volumeValue.textContent = percent + '%';
+    if (save) {
+      try { localStorage.setItem('k1ttyf-volume', String(percent)); } catch (e) {}
+    }
+  };
+
+  setVolume(readSavedVolume(), false);
+
+  if (Math.abs(audioElement.volume - volumeInput.value / 100) > 0.01) {
+    player.classList.add('no-volume');
+  }
+
+  const syncPlayer = () => {
+    player.classList.toggle('is-paused', audioElement.paused);
+    playerToggle.setAttribute('aria-label', audioElement.paused ? 'Играть' : 'Пауза');
+  };
+
+  audioElement.addEventListener('play', syncPlayer);
+  audioElement.addEventListener('pause', syncPlayer);
+  syncPlayer();
+
+  playerToggle.addEventListener('click', () => {
+    if (audioElement.paused) {
       audioElement.play().catch(() => {});
-      initParticles();
-    }, 300);
+    } else {
+      audioElement.pause();
+    }
+  });
+
+  volumeInput.addEventListener('input', () => {
+    setVolume(parseInt(volumeInput.value, 10), true);
+  });
+
+  const bgVideo = document.querySelector('.bg-video');
+  const loadingLabel = clickScreen.querySelector('.loading');
+  let entered = false;
+  let videoReady = false;
+
+  const showVideo = () => {
+    if (!entered || !videoReady) return;
+    if (!prefersReducedMotion) bgVideo.play().catch(() => {});
+    bgVideo.classList.add('is-on');
+  };
+
+  const loadBackground = async () => {
+    const src = bgVideo.dataset.src;
+    bgVideo.addEventListener('canplay', () => {
+      videoReady = true;
+      showVideo();
+    }, { once: true });
+
+    const saveData = navigator.connection && navigator.connection.saveData;
+    if (prefersReducedMotion || saveData) {
+      bgVideo.src = src;
+      return;
+    }
+
+    loadingLabel.hidden = false;
+    try {
+      const response = await fetch(src);
+      if (!response.ok || !response.body) throw new Error('fetch failed');
+
+      const total = parseInt(response.headers.get('content-length'), 10) || 0;
+      const reader = response.body.getReader();
+      const chunks = [];
+      let received = 0;
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+        if (total) {
+          loadingLabel.textContent = 'загрузка фона ' + Math.min(99, Math.floor(received / total * 100)) + '%';
+        }
+      }
+
+      bgVideo.src = URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' }));
+    } catch (e) {
+      bgVideo.src = src;
+    }
+    loadingLabel.hidden = true;
+  };
+
+  if (bgVideo) loadBackground();
+
+  const reveal = () => {
+    if (entered) return;
+    entered = true;
+
+    audioElement.play().catch(() => {});
+
+    if (bgVideo) showVideo();
+    clickScreen.classList.add('is-leaving');
+
+    setTimeout(() => {
+      clickScreen.hidden = true;
+      block.hidden = false;
+      block.classList.add('is-in');
+
+    }, 240);
 
     if (prefersReducedMotion) return;
 
