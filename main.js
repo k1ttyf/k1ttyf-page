@@ -123,24 +123,32 @@ document.addEventListener('DOMContentLoaded', function () {
   const bgVideo = document.querySelector('.bg-video');
   const loadingLabel = clickScreen.querySelector('.loading');
   let entered = false;
-  let videoReady = false;
 
   const showVideo = () => {
-    if (!entered || !videoReady) return;
-    if (!prefersReducedMotion) bgVideo.play().catch(() => {});
-    bgVideo.classList.add('is-on');
+    if (!entered || !bgVideo.getAttribute('src')) return;
+    bgVideo.play().catch(() => {});
+  };
+
+  const setVideoSource = (url) => {
+    bgVideo.src = url;
+    showVideo();
   };
 
   const loadBackground = async () => {
     const src = bgVideo.dataset.src;
-    bgVideo.addEventListener('canplay', () => {
-      videoReady = true;
-      showVideo();
-    }, { once: true });
+
+    bgVideo.addEventListener('playing', () => {
+      bgVideo.classList.add('is-on');
+      if (prefersReducedMotion) bgVideo.pause();
+    });
+
+    bgVideo.addEventListener('error', () => {
+      if (bgVideo.src.startsWith('blob:')) setVideoSource(src);
+    });
 
     const saveData = navigator.connection && navigator.connection.saveData;
     if (prefersReducedMotion || saveData) {
-      bgVideo.src = src;
+      setVideoSource(src);
       return;
     }
 
@@ -164,9 +172,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
 
-      bgVideo.src = URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' }));
+      setVideoSource(URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' })));
     } catch (e) {
-      bgVideo.src = src;
+      setVideoSource(src);
     }
     loadingLabel.hidden = true;
   };
