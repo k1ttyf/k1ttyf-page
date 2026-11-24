@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }, text.length * delay);
   };
 
-  const audioElement = new Audio('music.mp3');
+  const audioElement = new Audio('/assets/media/music.mp3');
   audioElement.loop = true;
 
   const player = document.querySelector('.player');

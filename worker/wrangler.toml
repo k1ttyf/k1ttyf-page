@@ -1,0 +1,11 @@
+name = "k1ttyf-lastfm"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+routes = [
+  { pattern = "api.k1ttyf.xyz", custom_domain = true }
+]
+
+[vars]
+LASTFM_USER = "k1ttyf"
+
